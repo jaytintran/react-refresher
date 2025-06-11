@@ -7,7 +7,12 @@ import Loader from "@/components/Loader";
 import Error from "@/components/Error";
 import StartScreen from "@/components/StartScreen";
 import Question from "@/components/Question";
-import TotalPoints from "./components/TotalPoints";
+import TotalPoints from "@/components/TotalPoints";
+import NextButton from "@/components/NextButton";
+import FinishScreen from "@/components/FinishScreen";
+import Timer from "@/components/Timer";
+
+const SECS_PER_QUESTION = 30;
 
 const initialState = {
 	questions: [],
@@ -16,7 +21,8 @@ const initialState = {
 	currentQuestion: 0,
 	points: 0,
 	answer: null,
-	secondsRemaining: 300,
+	secondsRemains: null,
+	highScore: 0,
 };
 
 function reducer(state, action) {
@@ -28,7 +34,11 @@ function reducer(state, action) {
 		case "dataFailed":
 			return { ...state, status: "error" };
 		case "startQuiz":
-			return { ...state, status: "active" };
+			return {
+				...state,
+				status: "active",
+				secondsRemains: state.questions.length * SECS_PER_QUESTION,
+			};
 		case "newAnswer": {
 			const question = state.questions[state.currentQuestion];
 			return {
@@ -44,7 +54,34 @@ function reducer(state, action) {
 			return {
 				...state,
 				currentQuestion: state.currentQuestion + 1,
-				answer: payload,
+				answer: null,
+			};
+		case "finish":
+			return {
+				...state,
+				status: "finished",
+				highScore:
+					state.points > state.highScore ? state.points : state.highScore,
+			};
+		case "restart":
+			return {
+				...initialState,
+				questions: state.questions,
+				status: "ready",
+			};
+		case "tick":
+			// if (state.secondsRemains === 0) {
+			// 	return {
+			// 		...state,
+			// 		status: "finished",
+			// 		highScore:
+			// 			state.points > state.highScore ? state.points : state.highScore,
+			// 	};
+			// }
+			return {
+				...state,
+				secondsRemains: state.secondsRemains - 1,
+				status: state.secondsRemains === 0 ? "finished" : state.status,
 			};
 		default:
 			throw new Error("Invalid action type");
@@ -54,8 +91,20 @@ function reducer(state, action) {
 export default function App() {
 	const [state, dispatch] = useReducer(reducer, initialState);
 
-	const { questions, status, currentQuestion, answer, points } = state;
+	const {
+		questions,
+		status,
+		currentQuestion,
+		answer,
+		points,
+		highScore,
+		secondsRemains,
+	} = state;
+
 	const numberOfQuestions = questions.length;
+	const totalQuestionsPoint = questions
+		.map((question) => question.points)
+		.reduce((a, b) => a + b, 0);
 
 	useEffect(() => {
 		async function fetchQuestions() {
@@ -79,6 +128,7 @@ export default function App() {
 			<Header />
 			<Main>
 				<div>
+					{/* Display loading screen */}
 					{status === "loading" && <Loader />}
 					{status === "error" && <Error />}
 
@@ -90,15 +140,43 @@ export default function App() {
 						/>
 					)}
 
-					<TotalPoints points={points} />
-
+					{/* Display questions */}
 					{status === "active" && (
-						<Question
-							index={currentQuestion}
-							question={questions[currentQuestion]}
-							numberOfQuestions={numberOfQuestions}
+						<>
+							<TotalPoints
+								points={points}
+								numberOfQuestions={numberOfQuestions}
+								index={currentQuestion}
+								totalQuestionsPoint={totalQuestionsPoint}
+								answer={answer}
+							/>
+							<Question
+								index={currentQuestion}
+								question={questions[currentQuestion]}
+								numberOfQuestions={numberOfQuestions}
+								dispatch={dispatch}
+								answer={answer}
+							/>
+							<footer>
+								<Timer secondsRemains={secondsRemains} dispatch={dispatch} />
+
+								<NextButton
+									dispatch={dispatch}
+									answer={answer}
+									index={currentQuestion}
+									numberOfQuestions={numberOfQuestions}
+								/>
+							</footer>
+						</>
+					)}
+
+					{/* When finish the quiz */}
+					{status === "finished" && (
+						<FinishScreen
+							points={points}
+							totalQuestionsPoint={totalQuestionsPoint}
+							highScore={highScore}
 							dispatch={dispatch}
-							answer={answer}
 						/>
 					)}
 				</div>

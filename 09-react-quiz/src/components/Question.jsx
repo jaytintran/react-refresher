@@ -1,7 +1,7 @@
 import React from "react";
 
 const Question = ({ index, question, numberOfQuestions, dispatch, answer }) => {
-	console.log(question);
+	// console.log(question);
 	const { question: questionText, options, correctOption, points } = question;
 	return (
 		<section>
