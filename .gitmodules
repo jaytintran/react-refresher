@@ -1,0 +1,3 @@
+[submodule "10-world-wise"]
+	path = 10-world-wise
+	url = git@github.com:jaytintran/world-wise.git
