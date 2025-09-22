@@ -1,0 +1,3 @@
+[submodule "11-atomic-blog"]
+	path = 11-atomic-blog
+	url = git@github.com:jaytintran/atomic-blog.git
