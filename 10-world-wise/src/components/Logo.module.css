@@ -1,0 +1,9 @@
+.logo {
+	height: 5.2rem;
+}
+
+.logoContainer {
+	display: flex;
+	gap: 1rem;
+	align-items: center;
+}
