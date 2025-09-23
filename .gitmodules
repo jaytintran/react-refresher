@@ -1,3 +1,6 @@
 [submodule "11-atomic-blog"]
 	path = 11-atomic-blog
 	url = git@github.com:jaytintran/atomic-blog.git
+[submodule "07-use-pop-corn"]
+	path = 07-use-pop-corn
+	url = git@github.com:jaytintran/use-popcorn.git
